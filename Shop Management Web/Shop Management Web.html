@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop Management</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            transition: background-color 0.3s;
+        }
+
+        .dark-mode {
+            background-color: #333;
+            color: #fff;
+        }
+
+        h1, h2 {
+            color: #333;
+        }
+
+        table {
+            width: 80%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .actions {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-around;
+            width: 60%;
+        }
+
+        button {
+            padding: 10px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            outline: none;
+            color: #fff;
+            background-color: #4CAF50;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        input {
+            padding: 8px;
+            margin-right: 10px;
+        }
+
+        input[type="number"] {
+            width: 70px;
+        }
+
+        input[type="text"], input[type="number"] {
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            margin-bottom: 10px;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus {
+            outline: 2px solid #4CAF50;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Shop Management</h1>
+
+    <div>
+        <h2>Product List</h2>
+        <table id="productTable">
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Quantity</th>
+            </tr>
+        </table>
+    </div>
+	
+    <div class="actions">
+        <button onclick="restockProduct()">Restock Product</button>
+        <button onclick="removeProduct()">Remove Product</button>
+        <button onclick="updateProduct()">Update Product</button>
+        <button onclick="filterByQuantity()">Filter Products by Quantity</button>
+        <button onclick="processTransaction()">Process Transaction</button>
+        <button onclick="calculateTotalValue()">Calculate Total Value</button>
+        <button onclick="sortProductsByName()">Sort Products by Name</button>
+        <button onclick="displayProductDetails()">Display Product Details</button>
+    </div>
+	
+	<div>
+        <h2>Console</h2>
+        <textarea id="console" rows="10" cols="50" readonly></textarea>
+        <br>
+        <label for="commandInput">Enter Command:</label>
+        <input type="text" id="commandInput">
+        <button onclick="executeCommand()">Execute Command</button>
+    </div>
+
+    <script>
+        // Sample product data (replace with actual data from your C++ application)
+        let products = [
+            { id: 1, name: "ProductA", price: 10.99, quantity: 50 },
+            { id: 2, name: "ProductB", price: 25.50, quantity: 30 },
+            { id: 3, name: "ProductC", price: 5.75, quantity: 100 },
+            { id: 4, name: "ProductD", price: 15.75, quantity: 75 },
+            { id: 5, name: "ProductE", price: 8.50, quantity: 20 }
+        ];
+
+        // Function to display products in the table
+        function displayProducts() {
+            const table = document.getElementById("productTable");
+            // Clear existing rows
+            table.innerHTML = "<tr><th>ID</th><th>Name</th><th>Price</th><th>Quantity</th></tr>";
+
+            // Add rows for each product
+            for (const product of products) {
+                const row = table.insertRow();
+                row.insertCell(0).textContent = product.id;
+                row.insertCell(1).textContent = product.name;
+                row.insertCell(2).textContent = product.price;
+                row.insertCell(3).textContent = product.quantity;
+            }
+        }
+
+        // Function to restock a product
+        function restockProduct() {
+            const productId = prompt("Enter product ID to restock:");
+            const quantity = prompt("Enter quantity to add:");
+
+            const product = products.find(p => p.id == productId);
+            if (product) {
+                product.quantity += parseInt(quantity);
+                displayProducts();
+				addToConsole("Restocked product.");
+            } else {
+                alert("Product not found.");
+            }
+        }
+		
+		// Function to sort products by name
+        function sortProductsByName() {
+            products.sort((a, b) => a.name.localeCompare(b.name));
+            displayProducts();
+			addToConsole("Sorted products by name.");
+        }
+
+        // Function to remove a product
+        function removeProduct() {
+            const productId = prompt("Enter product ID to remove:");
+
+            products = products.filter(product => product.id != productId);
+            displayProducts();
+			addToConsole("Removed product.");
+        }
+
+        // Function to update product information
+        function updateProduct() {
+            const productId = prompt("Enter product ID to update:");
+            const newName = prompt("Enter new name:");
+            const newPrice = prompt("Enter new price:");
+            const newQuantity = prompt("Enter new quantity:");
+
+            const product = products.find(p => p.id == productId);
+            if (product) {
+                product.name = newName;
+				addToConsole("Updated product.");
+                product.price = parseFloat(newPrice);
+                product.quantity = parseInt(newQuantity);
+                displayProducts();
+            } else {
+                alert("Product not found.");
+            }
+        }
+
+        // Function to filter products by quantity
+        function filterByQuantity() {
+            const threshold = prompt("Enter quantity threshold:");
+
+            const filteredProducts = products.filter(product => product.quantity >= threshold);
+            displayFilteredProducts(filteredProducts);
+			addToConsole("Filtered products by quantity.");
+        }
+
+        // Function to display filtered products
+        function displayFilteredProducts(filteredProducts) {
+            const table = document.getElementById("productTable");
+            // Clear existing rows
+            table.innerHTML = "<tr><th>ID</th><th>Name</th><th>Price</th><th>Quantity</th></tr>";
+
+            // Add rows for each filtered product
+            for (const product of filteredProducts) {
+                const row = table.insertRow();
+                row.insertCell(0).textContent = product.id;
+                row.insertCell(1).textContent = product.name;
+                row.insertCell(2).textContent = product.price;
+                row.insertCell(3).textContent = product.quantity;
+            }
+        }
+
+        // Function to process a transaction
+        function processTransaction() {
+            const productId = prompt("Enter product ID for the transaction:");
+            const quantity = prompt("Enter quantity for the transaction:");
+
+            const product = products.find(p => p.id == productId);
+            if (product) {
+                if (product.quantity >= quantity) {
+                    const totalCost = product.price * quantity;
+                    alert(`Transaction successful. Total cost: ${totalCost}`);
+                    product.quantity -= parseInt(quantity);
+                    displayProducts();
+					addToConsole("Processed transaction.");
+                } else {
+                    alert("Insufficient quantity available for the transaction.");
+                }
+            } else {
+                alert("Product not found.");
+            }
+        }
+		
+		// Function to display product details
+        function displayProductDetails() {
+            const productId = prompt("Enter product ID to display details:");
+
+            const product = products.find(p => p.id == productId);
+
+            if (product) {
+                alert(`Product Details:\nID: ${product.id}\nName: ${product.name}\nPrice: ${product.price}\nQuantity: ${product.quantity}`);
+            } else {
+                alert("Product not found.");
+            }
+        }
+
+        // Function to calculate the total value of products
+        function calculateTotalValue() {
+            const totalValue = products.reduce((acc, product) => acc + (product.price * product.quantity), 0);
+            alert(`Total value of products: ${totalValue}`);
+			addToConsole("Calculated total value.");
+        }
+		
+		function changeButtonColor(color) {
+            const buttons = document.querySelectorAll('.actions button');
+            buttons.forEach(button => {
+                button.style.backgroundColor = color;
+            });
+            addToConsole(`Changed button color to ${color}.`);
+        }
+
+        function toggleDarkMode() {
+            const body = document.body;
+            body.classList.toggle("dark-mode");
+            const mode = body.classList.contains("dark-mode") ? "Dark" : "Light";
+            addToConsole(`Toggled to ${mode} mode.`);
+        }
+
+        function addProduct() {
+            const newName = prompt("Enter the name of the new product:");
+            const newPrice = parseFloat(prompt("Enter the price of the new product:"));
+            const newQuantity = parseInt(prompt("Enter the quantity of the new product:"));
+
+            const newProduct = {
+                id: products.length + 1,
+                name: newName,
+                price: newPrice,
+                quantity: newQuantity
+            };
+
+            products.push(newProduct);
+            displayProducts();
+            addToConsole(`Added a new product: ${newName}.`);
+        }
+
+        function clearConsole() {
+            const consoleTextArea = document.getElementById("console");
+            consoleTextArea.value = "";
+            addToConsole("Console cleared.");
+        }
+
+        function addToConsole(message) {
+            const consoleTextArea = document.getElementById("console");
+            consoleTextArea.value += message + "\n";
+        }
+
+        function executeCommand() {
+            const commandInput = document.getElementById("commandInput");
+            const command = commandInput.value.trim().toLowerCase();
+
+            switch (command) {
+                case "changebuttoncolor":
+                    const newColor = prompt("Enter new color (e.g., #3498db):");
+                    if (/^#[0-9A-Fa-f]{6}$/.test(newColor)) {
+                        changeButtonColor(newColor);
+                    } else {
+                        addToConsole("Invalid color format. Please use a valid hex color code.");
+                    }
+                    break;
+                case "toggledarkmode":
+                    toggleDarkMode();
+                    break;
+                case "addproduct":
+                    addProduct();
+                    break;
+                case "clearconsole":
+                    clearConsole();
+                    break;
+                default:
+                    addToConsole(`Unknown command: ${command}`);
+            }
+
+            // Clear command input after execution
+            commandInput.value = "";
+        }
+
+        displayProducts();
+
+        // Initial display of products
+        displayProducts();
+    </script>
+</body>
+</html>
